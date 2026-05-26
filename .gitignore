@@ -1,0 +1,19 @@
+# --- R session / history ---
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+
+# --- Generated analysis output ---
+# Figures and tables are reproducible by running R/run_all.R, so they are not
+# tracked. Remove these two lines if you DO want to commit generated output.
+output/figures/*
+output/tables/*
+!output/figures/.gitkeep
+!output/tables/.gitkeep
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+*~
+.vscode/
