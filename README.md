@@ -74,4 +74,3 @@ results you paste into the report.
   instructions warn about. Adjust the legend position if it overlaps points.
 - The hand-built linear classification functions in `04_classification.R` are
   cross-checked against `MASS::lda()`; the apparent accuracies should match.
-```
