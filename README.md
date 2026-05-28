@@ -64,20 +64,6 @@ results you paste into the report.
 | C.2 — Discriminant analysis | `03_discriminant.R` | standardized coefficients, importance ranking, Wilks' Lambda + per-variable tests, LD1×LD2 plot |
 | C.3 — Classification | `04_classification.R` | linear classification functions, Obs #1 prediction, confusion matrix, APER & correct rate |
 
-## Decisions you must make and justify in the report
-
-These are intentionally left as explicit, editable choices rather than
-hard-coded — the project rewards justified judgement, not a single "right"
-answer:
-
-- **`DROP_VARS` in `02_correlation.R`** — which (if any) highly correlated
-  variable to remove. The script flags pairs with |r| ≥ 0.80 (the threshold is
-  also adjustable); you choose which member to keep and write up why. It is
-  fine for this to be empty if nothing is sufficiently correlated.
-- **`HIGH_CORR_THRESHOLD`** — the cutoff for "high" correlation.
-- **`TOP_K` in `04_classification.R`** — fixed at 4 per the project spec
-  ("top four most important variables").
-
 ## Notes
 
 - The grouping variable is read as a labelled factor (Low / Moderate / Severe).
@@ -88,4 +74,3 @@ answer:
   instructions warn about. Adjust the legend position if it overlaps points.
 - The hand-built linear classification functions in `04_classification.R` are
   cross-checked against `MASS::lda()`; the apparent accuracies should match.
-```
