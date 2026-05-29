@@ -59,7 +59,7 @@ if (nrow(high_pairs) == 0) {
 }
 
 # --- C.1.4  Decide which variables to drop ------------------------------------
-# >>> EDIT THIS based on high_pairs above and your written justification. <<<
+# >>> EDIT THIS based on high_pairs above and justification. <<<
 # If nothing is sufficiently correlated, leave it as character(0).
 # Example justification to record in the report: when two predictors are highly
 # correlated, keep the one that is (a) cheaper/easier to measure clinically, or
