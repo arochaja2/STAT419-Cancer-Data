@@ -4,9 +4,16 @@
 # Produces, for the non-grouping variables:
 #   * a histogram for every quantitative variable      -> output/figures/
 #   * a summary statistics table (mean, median, SD)     -> output/tables/
+#   * a chi-square Q-Q plot to assess multivariate normality, using the
+#     course function check.mvnorm.plot()               -> output/figures/
 #
 # Run with:  source("R/01_explore.R")   (after sourcing 00_setup.R, or it will
 #            source it for you).
+#
+# NOTE: Section B has no dedicated course function for histograms / summary
+#       statistics (those are plain base R: hist(), mean(), median(), sd()),
+#       so those parts are unchanged. The one relevant custom function here is
+#       check.mvnorm.plot(), used as a normality diagnostic.
 # =============================================================================
 
 if (!exists("cancer")) source(file.path("R", "00_setup.R"))
@@ -57,3 +64,14 @@ print(summary_stats, row.names = FALSE)
 # Base-R full summary (min / quartiles / max) for additional commentary.
 cat("\n--- Full summary() for reference ---\n")
 print(summary(cancer[QUANT_VARS]))
+
+# --- B.3  Multivariate normality diagnostic (course function) ------------------
+# check.mvnorm.plot() draws a chi-square probability (Q-Q) plot of the squared
+# Mahalanobis distances. Points near the 45-degree line support multivariate
+# normality, an assumption behind LDA / Hotelling-type procedures. Comment on
+# departures from the line in the report.
+save_plot(
+  filename = "mvnorm_chisq_qq.png",
+  width = 700, height = 600, res = 120,
+  expr = check.mvnorm.plot(cancer[QUANT_VARS])
+)
