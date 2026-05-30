@@ -8,7 +8,7 @@
 # Each step writes its figures to output/figures/ and tables to output/tables/.
 # Console output (the bits you paste into the report) is printed as it runs.
 #
-# The pipeline relies on the instructor-provided course functions in
+# The pipeline relies on the provided course functions in
 # R/_all_customized_functions.R (sourced by 00_setup.R), in particular:
 #   check.mvnorm.plot, discrim, discr.sig, partial.F, discr.plot,
 #   lin.class, rates.
