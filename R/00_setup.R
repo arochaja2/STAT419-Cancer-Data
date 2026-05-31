@@ -71,10 +71,10 @@ cancer$DIAGN <- factor(cancer$DIAGN,
                        levels = c(1, 2, 3),
                        labels = c("Low", "Moderate", "Severe"))
 
-LOG_FACTORS <- list('PSA', 'Volume', 'Weight')
+LOG_FACTORS <- list('PSA', 'Volume', 'Weight', 'BPH', 'Capsule')
 
 for (factor in LOG_FACTORS) {
-  cancer[factor] = log(cancer[factor])
+  cancer[factor] = log1p(cancer[factor])
 }
 
 # Convenience vectors -----------------------------------------------------------
