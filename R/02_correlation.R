@@ -8,7 +8,7 @@
 #
 # The decision of WHICH variable to drop is a judgement call you must justify
 # in the report. A common rule of thumb: |r| >= 0.80 is "high". This script
-# flags candidates; YOU choose and record the choice in DROP_VARS below.
+# flags candidates; we choose and record the choice in DROP_VARS below.
 # =============================================================================
 
 if (!exists("cancer")) source(file.path("R", "00_setup.R"))

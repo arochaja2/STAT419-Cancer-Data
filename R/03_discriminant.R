@@ -117,7 +117,7 @@ save_table("per_variable_significance.csv", round(partial_tests, 6))
 # can click. After clicking, export the plot from the RStudio Plots pane, or
 # wrap it in png()/dev.off() and click within the device.
 #
-# If locator() locks up your system, edit discr.plot() in
+# If locator() locks up the system, edit discr.plot() in
 # _all_customized_functions.R and delete the final legend(locator(1), ...) line,
 # then annotate the legend manually.
 if (interactive()) {

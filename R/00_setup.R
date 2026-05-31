@@ -71,6 +71,12 @@ cancer$DIAGN <- factor(cancer$DIAGN,
                        levels = c(1, 2, 3),
                        labels = c("Low", "Moderate", "Severe"))
 
+LOG_FACTORS <- list('PSA', 'Volume', 'Weight')
+
+for (factor in LOG_FACTORS) {
+  cancer[factor] = log(cancer[factor])
+}
+
 # Convenience vectors -----------------------------------------------------------
 GROUP_VAR   <- "DIAGN"
 QUANT_VARS  <- setdiff(names(cancer), GROUP_VAR)   # all non-grouping variables
