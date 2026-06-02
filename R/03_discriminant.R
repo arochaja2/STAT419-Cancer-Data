@@ -120,13 +120,9 @@ save_table("per_variable_significance.csv", round(partial_tests, 6))
 # If locator() locks up the system, edit discr.plot() in
 # _all_customized_functions.R and delete the final legend(locator(1), ...) line,
 # then annotate the legend manually.
-if (interactive()) {
-  discr.plot(Y, group, leg = levels(group))
-} else {
-  message("C.2.4: discr.plot() uses locator() and is skipped in non-interactive ",
-          "runs. Source 03_discriminant.R interactively and call:\n",
-          "  discr.plot(Y, group, leg = levels(group))")
-}
+
+save_plot("discrim.plot.png",
+  expr = discr.plot(Y, group, title='Discriminant Plot for Diagnosis Groups', leg = levels(group)))
 
 cat("\nSection C.2 complete. Objects available: da, std_coef, importance,",
     "discr_sig, partial_tests.\n")
