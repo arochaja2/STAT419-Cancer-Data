@@ -11,13 +11,13 @@
 # flags candidates; we choose and record the choice in DROP_VARS below.
 # =============================================================================
 
-if (!exists("cancer")) source(file.path("R", "00_setup.R"))
+if (!exists("cancer")) source(file.path("R", "01_explore.R"))
 
 # Threshold for "high" correlation -- adjust + justify in the report.
 HIGH_CORR_THRESHOLD <- 0.80
 
 # --- C.1.1  Correlation matrix -------------------------------------------------
-corr_matrix <- cor(cancer[QUANT_VARS], use = "complete.obs")
+corr_matrix <- cor(cancer[CHOSEN_VARS], use = "complete.obs")
 corr_matrix_round <- round(corr_matrix, 3)
 
 save_table("correlation_matrix.csv", corr_matrix_round)
@@ -28,7 +28,7 @@ print(corr_matrix_round)
 save_plot(
   filename = "scatterplot_matrix.png",
   width = 1000, height = 1000, res = 120,
-  expr = pairs(cancer[QUANT_VARS],
+  expr = pairs(cancer[CHOSEN_VARS],
                main = "Scatterplot Matrix of Quantitative Variables",
                pch = 19, cex = 0.5,
                col = c("steelblue", "darkorange", "firebrick")[cancer$DIAGN])
@@ -67,7 +67,7 @@ if (nrow(high_pairs) == 0) {
 DROP_VARS <- character(0)        # e.g. c("Capsule")
 
 # The predictor set carried forward into the discriminant analysis (C.2).
-ANALYSIS_VARS <- setdiff(QUANT_VARS, DROP_VARS)
+ANALYSIS_VARS <- setdiff(CHOSEN_VARS, DROP_VARS)
 
 cat("\nVariables dropped for C.2:",
     if (length(DROP_VARS)) paste(DROP_VARS, collapse = ", ") else "(none)", "\n")

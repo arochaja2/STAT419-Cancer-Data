@@ -246,16 +246,17 @@ partial.F <- function(Y, group){
 
 #################################################################
 
-discr.plot <- function(Y, group, leg = NULL){
+discr.plot <- function(Y, group, title= "", leg = NULL){
   a <- discrim(Y, group)$a
   z <- data.matrix(Y) %*% a
-  plot(z[,1], z[,2], type = "n", xlab = "LD1", ylab="LD2")
-  for(i in 1:length(unique(group))){
-    points(z[group == unique(group)[i],1],
-           z[group == unique(group)[i],2], pch = i)
+  g <- unique(group)
+  cols <- 1:length(g) + 1  # 2=red, 3=green, 4=blue, ...
+  plot(z[,1], z[,2], type = "n", main=title, xlab = "LD1", ylab="LD2")
+  for(i in 1:length(g)){
+    points(z[group == g[i],1], z[group == g[i],2], pch = i, col = cols[i])
   }
-  if(is.null(leg)) leg <- as.character(unique(group))
-  legend(locator(1),legend = leg,pch=1:length(unique(group)))
+  if(is.null(leg)) leg <- as.character(g)
+  legend("topright", legend = leg, pch = 1:length(g), col = cols)
 }
 
 #################################################################
