@@ -71,11 +71,7 @@ cancer$DIAGN <- factor(cancer$DIAGN,
                        levels = c(1, 2, 3),
                        labels = c("Low", "Moderate", "Severe"))
 
-LOG_FACTORS <- list('PSA', 'Volume', 'Weight', 'BPH', 'Capsule')
 
-for (factor in LOG_FACTORS) {
-  cancer[factor] = log1p(cancer[factor])
-}
 
 # Convenience vectors -----------------------------------------------------------
 GROUP_VAR   <- "DIAGN"
@@ -84,11 +80,12 @@ QUANT_VARS  <- setdiff(names(cancer), GROUP_VAR)   # all non-grouping variables
 # --- 5. Local helpers (file I/O only -- not statistical) -----------------------
 
 # Save a base-R plot to output/figures as a PNG. `expr` is the plotting code.
-save_plot <- function(filename, expr, width = 700, height = 500, res = 110) {
+save_plot <- function(filename, expr, subtitle = "", width = 700, height = 500, res = 110) {
   path <- file.path(PATHS$figures, filename)
   png(path, width = width, height = height, res = res)
   on.exit(dev.off())
   force(expr)
+  mtext(subtitle, side = 3)
   message("Saved figure: ", path)
   invisible(path)
 }

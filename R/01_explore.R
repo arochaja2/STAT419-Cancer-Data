@@ -18,18 +18,47 @@
 
 if (!exists("cancer")) source(file.path("R", "00_setup.R"))
 
+
+# --- Apply log Transformations on identified log variables ----
+LOG_FACTORS <- list('PSA', 'Volume', 'Weight')
+
+for (factor in LOG_FACTORS) {
+  cancer[paste("log_", factor, sep='')] = log(cancer[factor])
+}
+
+LOG_P1_FACTORS <- list('BPH', 'Capsule')
+for (factor in LOG_P1_FACTORS) {
+  cancer[paste("log1p_", factor, sep='')] = log1p(cancer[factor])
+}
+
+
 # --- B.1  Histograms -----------------------------------------------------------
 # One PNG per quantitative variable. Comment on shape/skew in the report.
-for (v in QUANT_VARS) {
+
+plot_hist <- function(v, title=paste("Histogram of", v)) {
+  print(v)
+shapiro <- shapiro.test(cancer[[v]])
   save_plot(
     filename = paste0("hist_", v, ".png"),
     expr = hist(cancer[[v]],
-                main = paste("Histogram of", v),
+                main = title,
                 xlab = v,
                 col  = "grey80",
-                border = "white")
-  )
+                border = "white"
+  ),subtitle = paste("Shaprio Statatistic:",formatC(shapiro$statistic, format = "e", digits = 3), " (p: ",formatC(shapiro$p.value, format = "e", digits = 3), ")", sep=''))
+
 }
+for (v in QUANT_VARS) {
+  plot_hist(v)
+}
+
+for (v in LOG_FACTORS) {
+  plot_hist(paste("log_",v,sep=''), paste("Histogram of Log(", v, ")"))
+}
+for (v in LOG_P1_FACTORS) {
+  plot_hist(paste("log1p_",v,sep=''), paste("Histogram of Log(1 + ", v, ")"))
+}
+
 
 # Optional: all histograms on a single panel for a quick overview in the report.
 save_plot(
