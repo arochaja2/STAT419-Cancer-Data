@@ -20,7 +20,7 @@ if (!exists("cancer")) source(file.path("R", "00_setup.R"))
 
 
 # --- Apply log Transformations on identified log variables ----
-LOG_FACTORS <- list('PSA', 'Volume', 'Weight')
+LOG_FACTORS <- list('PSA', 'Volume', 'Weight', 'Age')
 
 for (factor in LOG_FACTORS) {
   cancer[paste("log_", factor, sep='')] = log(cancer[factor])
@@ -94,6 +94,10 @@ print(summary_stats, row.names = FALSE)
 cat("\n--- Full summary() for reference ---\n")
 print(summary(cancer[QUANT_VARS]))
 
+
+# ---- Drop Identified Outliers ----
+cancer <- cancer[-41,] #Weight is 9 SD's above mean
+
 # --- B.3  Multivariate normality diagnostic (course function) ------------------
 # check.mvnorm.plot() draws a chi-square probability (Q-Q) plot of the squared
 # Mahalanobis distances. Points near the 45-degree line support multivariate
@@ -103,4 +107,16 @@ save_plot(
   filename = "mvnorm_chisq_qq.png",
   width = 700, height = 600, res = 120,
   expr = check.mvnorm.plot(cancer[QUANT_VARS])
+)
+
+
+# --- B.3  Altered MVN Plot  ------------------
+
+# This plot has variables that were chosen.
+
+CHOSEN_VARS <- c("log_Weight", "Age", "log_PSA", "log_Volume", "Gleason")
+save_plot(
+  filename = "mvnorm_chisq_qq_chosen_vars.png",
+  width = 700, height = 600, res = 120,
+  expr = check.mvnorm.plot(cancer[CHOSEN_VARS])
 )
