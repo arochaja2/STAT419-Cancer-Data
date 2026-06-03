@@ -63,10 +63,10 @@ for (v in LOG_P1_FACTORS) {
 # Optional: all histograms on a single panel for a quick overview in the report.
 save_plot(
   filename = "hist_panel_all.png",
-  width = 900, height = 700,
+  width = 1200, height = 1000,
   expr = {
-    op <- par(mfrow = c(3, 3), mar = c(4, 4, 2, 1))
-    for (v in QUANT_VARS) {
+    op <- par(mfrow = c(4, 4), mar = c(4, 4, 2, 1))
+    for (v in setdiff(names(cancer), GROUP_VAR)) {
       hist(cancer[[v]], main = v, xlab = "", col = "grey80", border = "white")
     }
     par(op)
