@@ -114,9 +114,27 @@ save_plot(
 
 # This plot has variables that were chosen.
 
+
 CHOSEN_VARS <- c("log_Weight", "Age", "log_PSA", "log_Volume", "Gleason")
+m1 <- cancer[cancer$DIAGN == 'Low',][CHOSEN_VARS]
+m2 <- cancer[cancer$DIAGN == 'Moderate',][CHOSEN_VARS]
+m3 <-cancer[cancer$DIAGN == 'Severe',][CHOSEN_VARS]
+
+
+plot_mvns <- function() {
+  par(mfrow=c(2,2))
+  check.mvnorm.plot(cancer[CHOSEN_VARS])
+  mtext("All DIAGN",side=3)
+  check.mvnorm.plot(m1)
+  mtext("DIAGN=Low",side=3)
+  check.mvnorm.plot(m2)
+  mtext("DIAGN=Moderate",side=3)
+  check.mvnorm.plot(m3)
+  mtext("DIAGN=Severe", side=3)
+}
+
 save_plot(
-  filename = "mvnorm_chisq_qq_chosen_vars.png",
+  filename = "mvnorm_chisq_qq_chosen_vars_all.png",
   width = 700, height = 600, res = 120,
-  expr = check.mvnorm.plot(cancer[CHOSEN_VARS])
+  expr = plot_mvns()
 )
