@@ -72,5 +72,3 @@ results you paste into the report.
 - The LD1 × LD2 plot uses a fixed-corner legend rather than the interactive
   `locator()` placement mentioned in the spec, to avoid the lock-up the
   instructions warn about. Adjust the legend position if it overlaps points.
-- The hand-built linear classification functions in `04_classification.R` are
-  cross-checked against `MASS::lda()`; the apparent accuracies should match.
