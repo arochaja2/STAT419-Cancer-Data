@@ -1,0 +1,30 @@
+body {
+  counter-reset: section;
+}
+
+h1.numbered {
+  counter-increment: section;
+  counter-reset: subsection;
+}
+
+h1.numbered .header-section-number {
+  visibility: hidden;
+}
+
+h1.numbered .header-section-number::before {
+  content: counter(section, upper-alpha);
+  visibility: visible;
+}
+
+h2.numbered {
+  counter-increment: subsection;
+}
+
+h2.numbered .header-section-number {
+  visibility: hidden;
+}
+
+h2.numbered .header-section-number::before {
+  content: counter(section, upper-alpha) "." counter(subsection);
+  visibility: visible;
+}
