@@ -3,7 +3,7 @@
 #
 # Depends on ANALYSIS_VARS / DROP_VARS defined in 02_correlation.R.
 #
-# Uses the instructor-provided COURSE FUNCTIONS wherever possible:
+# Uses the provided COURSE FUNCTIONS wherever possible:
 #   discrim()    -- raw ($a) and standardized ($a.stand) discriminant coeffs
 #   discr.sig()  -- sequential significance tests of the discriminant functions
 #   partial.F()  -- partial-F significance of each variable (adjusted for others)

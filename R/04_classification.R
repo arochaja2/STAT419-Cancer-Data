@@ -3,7 +3,7 @@
 #
 # Uses the TOP FOUR most important variables from the C.2 importance ranking.
 #
-# This version uses the instructor-provided COURSE FUNCTIONS wherever possible:
+# This version uses the provided COURSE FUNCTIONS wherever possible:
 #   lin.class()  -- linear classification function coefficients + constants
 #                   for each group level (Fisher's LCFs under equal priors)
 #   rates()      -- confusion matrix, correct classification rate, error rate
