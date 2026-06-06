@@ -44,7 +44,7 @@ install_if_missing(required_pkgs)
 invisible(lapply(required_pkgs, library, character.only = TRUE))
 
 
-source('R/_all_customized_functions.R') #Load custom functions
+source('_all_customized_functions.R') #Load custom functions
 
 cancer <- read.csv('./data/cancer_419.csv', sep = ",", header = TRUE,
                    fileEncoding = "UTF-8-BOM")
@@ -407,28 +407,9 @@ For classification analysis we first select the top 4 most important variables f
 
 TOP_K    <- 4
 top_vars <- head(ld1_order, TOP_K)        # ld1_order defined in the C.2 importance chunk
-
-Y      <- cancer.mod[, top_vars]
-group  <- cancer.mod[, 1]
-groups <- levels(group)
-
-# Fisher's linear classification functions: one column per group
-lc <- lin.class(Y, group)
-
-coefs_byvar <- t(lc$coefs)
-rownames(coefs_byvar) <- top_vars
-colnames(coefs_byvar) <- groups
-
-lcf_table <- rbind(Constant = lc$c.0, coefs_byvar)
-colnames(lcf_table) <- groups
-
-# Score one observation against every group's LCF
-lcf_scores <- function(x_vec) {
-  sapply(groups, function(g) lc$c.0[match(g, groups)] + sum(coefs_byvar[, g] * x_vec))
-}
 ```
 
-The top four variables, in order of importance, are `r paste(top_vars, collapse = ", ")`.
+Looking at @tbl-ld1-coef, the top four variables, in order of importance, are `r paste(top_vars, collapse = ", ")`.
 
 ### Linear Classification Functions
 
@@ -436,6 +417,17 @@ The linear classification function for each severity group is given below. An ob
 
 ```{r}
 #| label: tbl-classification-functions
+
+lc <- lin.class(cancer.mod[, top_vars], cancer.mod[, 1])
+
+coefs_byvar <- t(lc$coefs)
+rownames(coefs_byvar) <- top_vars
+colnames(coefs_byvar) <- levels(cancer.mod[,1])
+
+lcf_table <- rbind(Constant = lc$c.0, coefs_byvar)
+colnames(lcf_table) <- levels(cancer.mod[,1])
+
+
 knitr::kable(
   lcf_table,
   digits  = 4,
@@ -475,10 +467,23 @@ We apply the three functions to the first observation, compute each score, and a
 
 ```{r}
 #| label: tbl-classify-obs1
-obs1_x      <- as.matrix(Y)[1, ]
+
+
+groups <- levels(cancer.mod[,1])
+
+# Score one observation against every group's LCF
+lcf_scores <- function(x_vec) {
+  sapply(groups, function(g) lc$c.0[match(g, groups)] + sum(coefs_byvar[, g] * x_vec))
+}
+
+# Get observation 1
+obs1_x      <- cancer.mod[1,top_vars]
+#Compute LD Scores
 obs1_scores <- lcf_scores(obs1_x)
+# Get the highest score. 
 obs1_pred   <- groups[which.max(obs1_scores)]
-obs1_actual <- as.character(group[1])
+# Get actual Group
+obs1_actual <- as.character(cancer.mod[1,1])
 
 knitr::kable(
   data.frame(
@@ -498,7 +503,7 @@ Using resubstitution (apparent) classification on all observations:
 
 ```{r}
 #| label: tbl-confusion-matrix
-cls       <- rates(Y, group, method = "l")
+cls       <- rates(cancer.mod[,-1], cancer.mod[,1], method = "l")
 confusion <- cls[["Confusion Matrix"]]
 ACCR      <- cls[["Correct Class Rate"]]
 APER      <- cls[["Error Rate"]]
@@ -510,15 +515,17 @@ knitr::kable(
 
 ```{r}
 #| label: tbl-error-rates
-n         <- nrow(Y)
+
+n <- nrow(cancer.mod)
 n_correct <- round(ACCR * n)
 
 knitr::kable(
   data.frame(
     Metric = c("Apparent Correct Classification Rate (ACCR)",
                "Apparent Error Rate (APER)", "N", "Correct"),
-    Value  = c(round(ACCR, 4), round(APER, 4), n, n_correct)
+    Value  = c(ACCR, APER, n, n_correct)
   ),
+  digits=4
 )
 ```
 
