@@ -65,17 +65,17 @@ set.seed(67)
 
 A team of urologists set out to study how prostate-specific antigen (PSA) and a collection of clinical measurements relate to the progression of disease in men with advanced prostate cancer. The data set summarizes seven quantitative measurements taken on each of 97 such patients, along with a categorical variable indicating the severity of the disease. The goal of this project is to determine whether those seven measurements (or subset of them), considered jointly, can distinguish patients according to the severity of the seminal vesicle invasion, and to identify which measurements contribute most to that distinction.
 
-The grouping variable for all analyses is **DIAGN**, which indicates the severity of the seminal vesicle invasion. This variable takes on three levels low, moderate, and severe and is nearly balanced with 32 low observations, 33 moderate observations, and 32 severe observations.
+The grouping variable for all analyses is **DIAGN**, which indicates the severity of the seminal vesicle invasion. This variable takes on three levels: low, moderate, and severe and is nearly balanced with 32 low observations, 33 moderate observations, and 32 severe observations.
 
 The remaining seven variables are all quantitative and will serve as the predictors:
 
 * **PSA** - serum prostate-specific antigen level, in mg/ml. A widely used biomarker for prostate disease; elevated values are associated with more advanced disease.
-* **Volume -** volume of the prostate cancer, in cubic centimeters (cm3). A larger tumor volume generally signals a more advanced condition.
+* **Volume** - volume of the prostate cancer, in cubic centimeters (cm3). A larger tumor volume generally signals a more advanced condition.
 * **Weight** - weight of the prostate gland, in grams (g).
-* **Age** - age of the patient, in years,
+* **Age** - age of the patient, in years.
 * **BPH** - amount of benign prostatic hyperplasia, in square centimeters (cm2). A measure of non-cancerous enlargement of the prostate.
 * **Capsule** - degree of capsular penetration, i.e. the extent to which the tumor has pushed into or through the prostatic capsule.
-* **Gleason** - a pathologically determined qualitative grade of the disease. Higher scores indicate a worse prognosis; in this sample the score takes only the integer values 6,7,8.
+* **Gleason** - a pathologically determined qualitative grade of the disease. Higher scores indicate a worse prognosis; in this sample the score takes only the integer values 6, 7, 8.
 
 The analysis using these features went in three stages. First we examined the distribution of each predictor through histograms and summary statistics (@sec-explore). We then checked for multicollinearity amongst our features, and fitted linear discriminants to find the combination of variables that best separate the three severity groups while also testing these combinations for significance (@sec-discrim-importance). Finally, using the most influential variables, we constructed linear classification functions and applied them to classify patients, and evaluate how accurately the resulting rule determines the true severity groups (@sec-classification).
 
@@ -99,7 +99,7 @@ knitr::kable(data.frame(
 ), digits = 4)
 ```
 
-Below we can also so histograms of each variable.
+Below we can also see histograms of each variable.
 
 
 ```{r}
@@ -180,14 +180,14 @@ sig_level <- 0.05 / nrow(cancer[,-1]) # Bonferroni correction
 
 observation_p <- pchisq(md,df=ncol(cancer.mod[,-1]))  # Compute the p value of seeing the value given MVN
 
-knitr::kable(cbind(cancer,observation_p)[which(observation_p < sig_level | observation_p > (1- sig_level)),]) #Select all points more extreme then the signifcance level
+knitr::kable(cbind(cancer,observation_p)[which(observation_p < sig_level | observation_p > (1- sig_level)),]) #Select all points more extreme then the significance level
 ```
 
-Based on the results we can see that 41 appears to be different from the dataset. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within normal range, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significanlty higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this datapoint from our analysis.
+Based on the results we can see that 41 appears to be different from the dataset. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within normal range, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significantly higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this datapoint from our analysis.
 
 
 ```{r}
-#| label: Drop Outlier
+#| label: drop-outlier
 cancer.mod <- cancer.mod[-41,]
 ```
 
@@ -337,7 +337,7 @@ $H_0: \alpha_1 = \alpha_2 = 0$,
 $H_a: \text{at least one } \alpha \ne 0$
 
 __(2)__
-$H_0:\alpha_2 = 0$,
+$H_0: \alpha_2 = 0$,
 $H_a: \alpha_2 \ne 0$
 
 Since we have two discriminant functions, there will be 2 tests performed (listed above), we must adjust our level of significance to $\frac{0.05}{2} = 0.025$. The results are:
@@ -533,6 +533,6 @@ This conclusion is further supported by the classification results. Using the li
 
 One thing in this analysis did stand out, mainly that no variables were collinear enough to drop in Section C.1, even though we expected PSA, Volume, and Capsule might have been redundant; their correlations were moderate, but never reached our thresholds.
 
-If we were to repeat this project, we would make two key improvements. First, we would explore alternative data transformations, either in place of or in combination with log transformations, such as the Box–Cox transformation. This would be particularly useful for variables such as BPM and Capsule, which remain skewed even after applying a log transformation. Second, we would implement leave-one-out cross-validation to estimate the classification error rate. This would allow us to assess whether the selected transformations and resulting classification model generalize well to new observations, rather than overfitting to the particular dataset used in this analysis.
+If we were to repeat this project, we would make two key improvements. First, we would explore alternative data transformations, either in place of or in combination with log transformations, such as the Box–Cox transformation. This would be particularly useful for variables such as BPH and Capsule, which remain skewed even after applying a log transformation. Second, we would implement leave-one-out cross-validation to estimate the classification error rate. This would allow us to assess whether the selected transformations and resulting classification model generalize well to new observations, rather than overfitting to the particular dataset used in this analysis.
 
 Finally, one variable we wish the data would have included is a direct measure of tumor stage (such as a TNM clinical stage) or a PSA reading taken over time rather than at a single point. More generally some variable(s) that would give information about the trajectory of the disease for a given patient would help in getting cleaner separation for the observations on the border of moderate and severe, which were the toughest to classify with measurements available.
