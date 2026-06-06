@@ -69,10 +69,10 @@ The grouping variable for all analyses is **DIAGN**, which indicates the severit
 The remaining seven variables are all quantitative and will serve as the predictors:
 
 * **PSA** - serum prostate-specific antigen level, in mg/ml. A widely used biomarker for prostate disease; elevated values are associated with more advanced disease.
-* **Volume** - volume of the prostate cancer, in cubic centimeters (cm3). A larger tumor volume generally signals a more advanced condition.
+* **Volume** - volume of the prostate cancer, in cubic centimeters ($\text{cm}^3$). A larger tumor volume generally signals a more advanced condition.
 * **Weight** - weight of the prostate gland, in grams (g).
 * **Age** - age of the patient, in years.
-* **BPH** - amount of benign prostatic hyperplasia, in square centimeters (cm2). A measure of non-cancerous enlargement of the prostate.
+* **BPH** - amount of benign prostatic hyperplasia, in square centimeters ($\text{cm}$2$). A measure of non-cancerous enlargement of the prostate.
 * **Capsule** - degree of capsular penetration, i.e. the extent to which the tumor has pushed into or through the prostatic capsule.
 * **Gleason** - a pathologically determined qualitative grade of the disease. Higher scores indicate a worse prognosis; in this sample the score takes only the integer values 6, 7, 8.
 
