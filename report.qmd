@@ -14,6 +14,7 @@ number-depth: 2
 format:
   html: default
   pdf: 
+    toc: true
     colorlinks: true
     header-includes:
       - \usepackage{fvextra}
@@ -299,7 +300,7 @@ knitr::kable(cor(cancer.all7), digits = 4,
 #| fig-width: 10
 #| fig-height: 8
 pairs(cancer.all7,
-      main = "Scatterplot Matrix — All Seven Predictors",
+      main = "Scatterplot Matrix - All Seven Predictors",
       pch = 19, cex = 0.5,
       col = c("steelblue", "darkorange", "firebrick")[cancer$DIAGN])
 ```
