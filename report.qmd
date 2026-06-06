@@ -64,7 +64,7 @@ set.seed(67)
 
 A team of urologists set out to study how prostate-specific antigen (PSA) and a collection of clinical measurements relate to the progression of disease in men with advanced prostate cancer. The data set summarizes seven quantitative measurements taken on each of 97 such patients, along with a categorical variable indicating the severity of the disease. The goal of this project is to determine whether those seven measurements (or subset of them), considered jointly, can distinguish patients according to the severity of the seminal vesicle invasion, and to identify which measurements contribute most to that distinction.
 
-The grouping variable for all analyses is **DIAGN**, which indicates the severity of the seminal vesicle invasion. This variable takes on three levels: low, moderate, and severe and is nearly balanced with `r sum(cancer$DIAGN == "Low")` low observations, `r sum(cancer$DIAGN == "Moderate")` moderate observations, and `r sum(cancer$DIAGN == "Severe")` severe observations.
+The grouping variable for all analyses is **DIAGN**, which indicates the severity of the seminal vesicle invasion. This variable takes on three levels: low, moderate, and severe and it is nearly balanced with `r sum(cancer$DIAGN == "Low")` low observations, `r sum(cancer$DIAGN == "Moderate")` moderate observations, and `r sum(cancer$DIAGN == "Severe")` severe observations.
 
 The remaining seven variables are all quantitative and will serve as the predictors:
 
@@ -76,7 +76,7 @@ The remaining seven variables are all quantitative and will serve as the predict
 * **Capsule** - degree of capsular penetration, i.e. the extent to which the tumor has pushed into or through the prostatic capsule.
 * **Gleason** - a pathologically determined qualitative grade of the disease. Higher scores indicate a worse prognosis; in this sample the score takes only the integer values 6, 7, 8.
 
-The analysis using these features went in three stages. First we examined the distribution of each predictor through histograms and summary statistics (@sec-explore). We then checked for multicollinearity amongst our features, and fitted linear discriminants to find the combination of variables that best separate the three severity groups while also testing these combinations for significance (@sec-discrim-importance). Finally, using the most influential variables, we constructed linear classification functions and applied them to classify patients, and evaluate how accurately the resulting rule determines the true severity groups (@sec-classification).
+The analysis using these features was in three stages. First we examined the distribution of each predictor through histograms and summary statistics (@sec-explore). We then checked for multicollinearity amongst our features, and fitted linear discriminants to find the combination of variables that best separate the three severity groups while also testing these combinations for significance (@sec-discrim-importance). Finally, using the most influential variables, we constructed linear classification functions and applied them to classify patients and evaluate how accurately the resulting rule determines the true severity groups (@sec-classification).
 
 
 # Graphs and Summary Statistics {#sec-explore}
@@ -137,7 +137,7 @@ LOG_VARS_log_fmt     <- paste0("log(", LOG_VARS, ")")
 LOG_VARS_log_str     <- paste(fmt(LOG_VARS_log_fmt), collapse = ", ")
 ```
 
-Based on the histogram it looks like the variables `r TRANSFORMED_VARS_fmt` are non normal.  We can try to apply transformations on them to see if we can make them look more normal.
+Based on the histograms it looks like the variables `r TRANSFORMED_VARS_fmt` are non normal.  We can try to apply transformations on them to see if we can make them look more normal.
 ```{r}
 #| label: fig-transformed-histograms
 #| fig-cap: "Histograms for all transformed variables"
@@ -166,7 +166,7 @@ plot.new()  # pad the 2x3 grid (5 plots, 1 empty cell)
 `BPH` and `Capsule` are transformed with a log + 1 transformation because they contain 0 values. See @tbl-summary-stats
 :::
 
-Looking at @fig-transformed-histograms, `r LOG_VARS_fmt` all appear to be roughly normal, however `r LOG1P_VARS_fmt` do not. Because Discriminant Analysis has a normality assumption we drop them from our data and only use `r LOG_VARS_log_str`, and the untransformed `r KEPT_VARS_fmt` for our analysis.
+Looking at @fig-transformed-histograms, `r LOG_VARS_fmt` all appear to be roughly normal, however `r LOG1P_VARS_fmt` do not. Because discriminant analysis assumes approximate multivariate normality we drop them from our data and only use `r LOG_VARS_log_str`, and the untransformed `r KEPT_VARS_fmt` for our analysis.
 
 
 Below is a scatterplot matrix of the transformed dataset.
@@ -189,7 +189,7 @@ pairs(cancer.mod[, -1],
 
 ## Outlier Identification {#sec-outlier-id}
 
-After looking at the data we can see some trends and possibly some outliers. Of note there is a point that appears to have a higher weight than the others. We can also check for outliers by performing a slightly more statistical method. Assuming that we have an MVN already, we can see how far away each dot is from the center, and the probability of seeing an observation that extreme.
+After looking at the data we can see some trends and possibly some outliers. Of note there is a point that appears to have a higher weight than the others. We can also check for outliers by performing a slightly more statistical method. AssAssuming approximate multivariate normality, we can see how far away each dot is from the center, and the probability of seeing an observation that extreme.
 ```{r}
 #| label: tbl-outlier-identification
 # Use mahalanobis to measure distance from centroid
@@ -209,7 +209,7 @@ observation_p <- pchisq(md, df = ncol(cancer.mod[, -1]), lower.tail = FALSE)
 knitr::kable(cbind(cancer, observation_p)[which(observation_p < sig_level), ])
 ```
 
-Based on the results we can see that 41 appears to be different from the dataset. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within normal range, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significantly higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this datapoint from our analysis.
+Based on the results we can see that observation 41 appears to be an outlier. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within typical range observed in this data set, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significantly higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this data point from our analysis.
 
 
 ```{r}
@@ -242,7 +242,7 @@ mtext("DIAGN=Severe", side=3)
 ```
 
 
-These plots looks pretty much like they're all MVN. The last check is to make sure they all have the same covariance matricies. To do this we use Box's M test.
+These plots look pretty much like they're all MVN. The last check is to make sure they all have the same covariance matrices. To do this we use Box's M test.
 
 ```{r}
 #| label: tbl-box-m
@@ -259,7 +259,7 @@ Box.M(cov_mats, n_obs)
 ```
 
 :::{.callout-caution}
-We actually failed Box's M test. However we still decided to proceed with discriminant analysis as it looks close enough.
+We actually failed Box's M test. However, we still decided to proceed with discriminant analysis as it looks close enough.
 :::
 
 Based on the output it appears all groups follow a multivariate normal distribution. This allows us to move on to discriminant analysis.
@@ -273,7 +273,7 @@ Based on the output it appears all groups follow a multivariate normal distribut
 knitr::kable(cor(cancer.mod[,-1]))
 ```
 
-To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix shows that there is no prominent linear relationship between any two variables. We can then look at the calculated correlation coefficients table. Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
+To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix shows that there is no strong linear relationship between any two variables. We can then look at the calculated correlation coefficient table. Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
 
 
 ## Discriminant Analysis {#sec-discrim-importance}
@@ -328,7 +328,7 @@ lda_latex <- function(coefs, log_transformations = NULL, digits = 4,
 }
 ```
 
-A linear discriminant analysis was performed to observe possible separation between the groups of severity of seminal vesicle invasion and what variables contribute the most in that separation. The discriminant analysis resulted in 2 discriminant functions: `r lda_latex(std_coef, log_transformations = LOG_VARS)`
+A linear discriminant analysis was performed to observe possible separation between the groups of severity of seminal vesicle invasion and which variables contribute the most in that separation. The discriminant analysis resulted in 2 discriminant functions: `r lda_latex(std_coef, log_transformations = LOG_VARS)`
 
 When looking at the importance of each variable in the first discriminant function, we get:
 
@@ -349,12 +349,12 @@ knitr::kable(
 
 
 
-The table of the standardized coefficients allows us to see that `r ld1_order[1]` seems to strongly contribute in group separation of severity of seminal vesicle invasion. Then `r ld1_order[2]` seems to have moderate contributions while `r paste(ld1_order[3:length(ld1_order)], collapse = ", ")` seem to have the weakest contribution.
+The table of the standardized coefficients allows us to see that `r ld1_order[1]` seems to strongly contribute to group separation of severity of seminal vesicle invasion. Then `r ld1_order[2]` seems to have moderate contributions while `r paste(ld1_order[3:length(ld1_order)], collapse = ", ")` seem to have the weakest contribution.
 
 
 ### Test of Significance of the Discriminant Functions
 
-To see which of linear discriminant functions are significant in group separation, we will test:
+To see which linear discriminant functions are significant in group separation, we will test:
 
 
 __(1)__
@@ -365,7 +365,7 @@ __(2)__
 $H_0: \alpha_2 = 0$,
 $H_a: \alpha_2 \ne 0$
 
-Since we have two discriminant functions, there will be 2 tests performed (listed above), we must adjust our level of significance to $\frac{0.05}{2} = 0.025$. The results are:
+Since we have two discriminant functions, 2 tests were performed (listed above), we must adjust our level of significance to $\frac{0.05}{2} = 0.025$. The results are:
 
 ```{r}
 #| label: tbl-discr-sig
@@ -375,7 +375,7 @@ knitr::kable(discr_sig_tbl)
 
 LD1: With a p-value of `r sprintf("%.4f", discr_sig_tbl["LD1", "p.values"])` being less than our adjusted significance level of 0.025, we have enough evidence that the first linear discriminant function works well in group separation of severity of seminal vesicle invasion. 
 
-LD2: With a p-value of `r sprintf("%.4f", discr_sig_tbl["LD2", "p.values"])` being larger than our adjusted significance level of 0.025, we don't have enough evidence that the second discriminant function is useful in group separation of severity of seminal vesicle invasion.
+LD2: With a p-value of `r sprintf("%.4f", discr_sig_tbl["LD2", "p.values"])` being greater than our adjusted significance level of 0.025, we don't have enough evidence that the second discriminant function is useful in group separation of severity of seminal vesicle invasion.
 
 ### Significance of Each Variable, Adjusted for the Others
 
@@ -417,9 +417,9 @@ discr.plot(cancer.mod[,-1], cancer.mod[,1], title='Discriminant Plot for Diagnos
 
 ```
 
-From this plot, it is visually evident the first discriminant function (LD1) captures the group separation well of the three groups of low, moderate, and severe seminal vesicle invasion. The severe severity of seminal vesicle invasion is on the left while the moderate level is on the right. Low severity of seminal vesicle invasion seems grouped in between the moderate and severe levels. 
+From this plot, it is visually evident the first discriminant function (LD1) captures the group separation well of the three groups of low, moderate, and severe seminal vesicle invasion. The severe group of seminal vesicle invasion is on the left while the moderate level is on the right. Low severity of seminal vesicle invasion seems grouped in between the moderate and severe levels. 
 
-The second discriminant function (LD2) does not capture the separation nature of the data as projections of the points on the line are clumped together. This further proves that LD1 is the better discriminant function that works well in group separation. 
+The second discriminant function (LD2) does not capture the separation among the groups as projections of the points on the line are clumped together. This further supports that LD1 is the better discriminant function that works well in group separation. 
 
 
 ## Classification Analysis {#sec-classification}
@@ -546,8 +546,8 @@ The goal of this project was to determine whether `r length(QUANT_VARS)` clinica
 
 This conclusion is further supported by the classification results (@sec-classification). Using the linear classification functions, the apparent correct classification rate (ACCR) was `r round(ACCR, 4)`, meaning that `r n_correct` of the `r n` observations were correctly classified. The confusion matrix (@tbl-confusion-matrix) also indicates that the model avoided the most severe types of misclassification: no patients in the low-severity group were classified as severe, and no patients in the severe group were classified as low. Instead, the misclassifications were limited to adjacent severity categories, such as low-severity observations being classified as moderate. Overall, these results suggest that the clinical measurements, particularly `r ld1_order[1]`, provide meaningful discrimination among levels of seminal vesicle invasion severity.
 
-One thing in this analysis did stand out, mainly that no variables were collinear enough to drop in @sec-collinearity, even though we expected PSA, Volume, and Capsule might have been redundant; their correlations were moderate, but never reached our thresholds.
+One notable result was that no variables were collinear enough to drop in @sec-collinearity, even though we expected PSA, Volume, and Capsule might have been redundant; their correlations were moderate, but never reached our thresholds.
 
 If we were to repeat this project, we would make two key improvements. First, we would explore alternative data transformations, either in place of or in combination with log transformations, such as the Box–Cox transformation. This would be particularly useful for variables such as BPH and Capsule, which remain skewed even after applying a log transformation. Second, we would implement leave-one-out cross-validation to estimate the classification error rate. This would allow us to assess whether the selected transformations and resulting classification model generalize well to new observations, rather than overfitting to the particular dataset used in this analysis.
 
-Finally, one variable we wish the data would have included is a direct measure of tumor stage (such as a TNM clinical stage) or a PSA reading taken over time rather than at a single point. More generally some variable(s) that would give information about the trajectory of the disease for a given patient would help in getting cleaner separation for the observations on the border of moderate and severe, which were the toughest to classify with measurements available.
+Finally, one variable we wish the data would have included is a direct measure of tumor stage (such as a TNM clinical stage) or a PSA reading taken over time rather than at a single point. More generally, variables that would give information about the trajectory of the disease for a given patient would help acheive cleaner separation for the observations on the border of moderate and severe, which were the toughest to classify with measurements available.
