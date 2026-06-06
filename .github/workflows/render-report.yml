@@ -18,11 +18,8 @@ jobs:
 
       - uses: quarto-dev/quarto-actions/setup@v2
 
-      - name: Install TinyTeX
-        run: quarto install tinytex
-
       - name: Install R packages
-        run: Rscript -e "install.packages(c('MASS', 'rmarkdown', 'knitr'), repos='https://cloud.r-project.org')"
+        run: Rscript -e "install.packages(c('MASS', 'rmarkdown', 'knitr', 'tinytex'), repos='https://cloud.r-project.org'); tinytex::install_tinytex()"
 
       - name: Render PDF
         run: quarto render report.qmd --to pdf
