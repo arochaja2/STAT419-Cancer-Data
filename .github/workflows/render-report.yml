@@ -1,0 +1,36 @@
+name: Render and Release Report
+
+on:
+  push:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.4"
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install TinyTeX
+        run: quarto install tinytex
+
+      - name: Install R packages
+        run: Rscript -e "install.packages('MASS', repos='https://cloud.r-project.org')"
+
+      - name: Render PDF
+        run: quarto render report.qmd --to pdf
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: report.pdf
+          tag_name: ${{ github.sha }}
+          name: "Report ${{ github.sha }}"
+          body: "Auto-generated PDF for commit ${{ github.sha }}."
