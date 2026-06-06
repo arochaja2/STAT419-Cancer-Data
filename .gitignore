@@ -18,3 +18,10 @@ output/tables/*
 Thumbs.db
 *~
 .vscode/
+
+
+#--- Report Info----
+
+report_files/
+report.html
+report.pdf
