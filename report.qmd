@@ -79,7 +79,7 @@ The remaining seven variables are all quantitative and will serve as the predict
 * **Capsule** - degree of capsular penetration, i.e. the extent to which the tumor has pushed into or through the prostatic capsule.
 * **Gleason** - a pathologically determined qualitative grade of the disease. Higher scores indicate a worse prognosis; in this sample the score takes only the integer values 6, 7, 8.
 
-The analysis using these features was in three stages. First we examined the distribution of each predictor through histograms and summary statistics (@sec-explore). We then checked for multicollinearity amongst our features, and fitted linear discriminants to find the combination of variables that best separate the three severity groups while also testing these combinations for significance (@sec-discrim-importance). Finally, using the most influential variables, we constructed linear classification functions and applied them to classify patients and evaluate how accurately the resulting rule determines the true severity groups (@sec-classification).
+The analysis using these features was in three stages. First we examined the distribution of each predictor through histograms and summary statistics (@sec-explore). We then checked for multicollinearity amongst our features, and fitted linear discriminants to find the combination of variables that best separate the three severity groups while also testing these combinations for significance (@sec-discrim-importaRnce). Finally, using the most influential variables, we constructed linear classification functions and applied them to classify patients and evaluate how accurately the resulting rule determines the true severity groups (@sec-classification).
 
 
 # Graphs and Summary Statistics {#sec-explore}
@@ -205,7 +205,7 @@ md <- mahalanobis(
 )
 
 # Bonferroni correction
-sig_level <- 0.05 / nrow(cancer[, -1])
+sig_level <- 0.05 / nrow(cancer)
 
 # Upper-tail p-value: probability of a chi-sq value this large under MVN
 # (large distance -> small p -> flagged as outlier)
