@@ -22,7 +22,7 @@ jobs:
         run: quarto install tinytex
 
       - name: Install R packages
-        run: Rscript -e "install.packages('MASS', repos='https://cloud.r-project.org')"
+        run: Rscript -e "install.packages(c('MASS', 'rmarkdown', 'knitr'), repos='https://cloud.r-project.org')"
 
       - name: Render PDF
         run: quarto render report.qmd --to pdf
