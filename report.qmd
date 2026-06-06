@@ -255,7 +255,14 @@ cov_mats <- list(
 
 n_obs <- unname(as.vector(table(cancer.mod$DIAGN)[c("Low", "Moderate", "Severe")]))
 
-Box.M(cov_mats, n_obs)
+box.results <- Box.M(cov_mats, n_obs)
+
+knitr::kable(data.frame(
+  Statistic = box.results$u,
+  df = box.results$chi.df,
+  `p-value` = box.results$p.value.u
+),caption = "Box's M Test Results")
+
 ```
 
 :::{.callout-caution}
