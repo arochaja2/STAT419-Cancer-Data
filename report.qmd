@@ -1,16 +1,14 @@
 ---
 title: 'Discriminant and Classification Analysis of Prostate Cancer Prognostic Measurements'
 subtitle: 'STAT 419: Multivariate Analysis — Spring 2026 Course Project — Group 2'
-
 author: 
   - Curtis Bradley
   - Ezli Cruz
   - Andrea Pareja
   - Andres Rocha Jayasinha
-
+  
 number-sections: true
 number-depth: 2
-
 format:
   html: default
   pdf: 
@@ -21,15 +19,13 @@ format:
       - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
       - \renewcommand{\thesection}{\Alph{section}}
       - \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
-
 crossref:
   sec-prefix: "Section"
-
 execute:
   echo: false
 ---
 
-
+**Repository:** [https://github.com/arochaja2/STAT419-Cancer-Data](https://github.com/arochaja2/STAT419-Cancer-Data)
 
 ```{r}
 #| label: load-dataset
@@ -79,7 +75,7 @@ The remaining seven variables are all quantitative and will serve as the predict
 * **Capsule** - degree of capsular penetration, i.e. the extent to which the tumor has pushed into or through the prostatic capsule.
 * **Gleason** - a pathologically determined qualitative grade of the disease. Higher scores indicate a worse prognosis; in this sample the score takes only the integer values 6, 7, 8.
 
-The analysis using these features was in three stages. First we examined the distribution of each predictor through histograms and summary statistics (@sec-explore). We then checked for multicollinearity amongst our features, and fitted linear discriminants to find the combination of variables that best separate the three severity groups while also testing these combinations for significance (@sec-discrim-importaRnce). Finally, using the most influential variables, we constructed linear classification functions and applied them to classify patients and evaluate how accurately the resulting rule determines the true severity groups (@sec-classification).
+The analysis using these features was in three stages. First we examined the distribution of each predictor through histograms and summary statistics (@sec-explore). We then checked for multicollinearity amongst our features, and fitted linear discriminants to find the combination of variables that best separate the three severity groups while also testing these combinations for significance (@sec-discrim-importance). Finally, using the most influential variables, we constructed linear classification functions and applied them to classify patients and evaluate how accurately the resulting rule determines the true severity groups (@sec-classification).
 
 
 # Graphs and Summary Statistics {#sec-explore}
@@ -88,6 +84,7 @@ Before analysis, we will see the nature of each variable in our dataset. Summary
 
 ```{r}
 #| label: tbl-summary-stats
+#| tbl-cap: "Summary statistics for all quantitative predictors"
 knitr::kable(data.frame(
   Variable = QUANT_VARS,
   Min      = sapply(cancer[QUANT_VARS], min, na.rm = TRUE),
@@ -98,7 +95,7 @@ knitr::kable(data.frame(
   Max      = sapply(cancer[QUANT_VARS], max, na.rm = TRUE),
   SD       = sapply(cancer[QUANT_VARS], sd, na.rm = TRUE),
   row.names = NULL
-), digits = 4, caption = "Summary statistics for all quantitative predictors")
+), digits = 4)
 ```
 
 Histograms of each variable are shown in @fig-variable-histograms.
@@ -197,6 +194,7 @@ pairs(cancer.mod[, -1],
 After looking at the data we can see some trends and possibly some outliers. Of note there is a point that appears to have a higher weight than the others. We can also check for outliers by performing a slightly more statistical method. Assuming approximate multivariate normality, we can see how far away each dot is from the center, and the probability of seeing an observation that extreme.
 ```{r}
 #| label: tbl-outlier-identification
+#| tbl-cap: "Observations flagged as outliers by Bonferroni-corrected Mahalanobis distance"
 # Use mahalanobis to measure distance from centroid
 md <- mahalanobis(
   x      = cancer.mod[, -1],
@@ -211,8 +209,7 @@ sig_level <- 0.05 / nrow(cancer)
 # (large distance -> small p -> flagged as outlier)
 observation_p <- pchisq(md, df = ncol(cancer.mod[, -1]), lower.tail = FALSE)
 
-knitr::kable(cbind(cancer, observation_p)[which(observation_p < sig_level), ],
-             caption = "Observations flagged as outliers by Bonferroni-corrected Mahalanobis distance")
+knitr::kable(cbind(cancer, observation_p)[which(observation_p < sig_level), ])
 ```
 
 Based on the results we can see that observation 41 appears to be an outlier. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within typical range observed in this data set, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significantly higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this data point from all subsequent analyses. All results from @sec-mvn-assumption onward are based on N = `r nrow(cancer) - 1` observations.
@@ -250,6 +247,7 @@ The plots in @fig-mvn-plots appear to be multivariate normal. The last check is 
 
 ```{r}
 #| label: tbl-box-m
+#| tbl-cap: "Box's M Test Results"
 # Box's M tests H0: all groups share a common covariance matrix (required for LDA)
 cov_mats <- list(
   Low      = cov(cancer.mod[cancer.mod$DIAGN == "Low",      -1], use = "complete.obs"),
@@ -265,7 +263,7 @@ knitr::kable(data.frame(
   Statistic = box.results$u,
   df = box.results$chi.df,
   `p-value` = box.results$p.value.u
-),caption = "Box's M Test Results")
+))
 
 ```
 
@@ -282,34 +280,24 @@ As required, we first examine all seven quantitative variables for multicollinea
 
 ```{r}
 #| label: tbl-corr-full
+#| tbl-cap: "Correlation matrix of all seven transformed quantitative predictors"
 # Full 7-variable correlation matrix on log/log1p transformed versions
 cancer.all7 <- cbind(
   cancer[setdiff(colnames(cancer), c(TRANSFORMED_VARS, GROUP_VAR))],
   log(cancer[LOG_VARS]),
   log1p(cancer[LOG1P_VARS])
 )
-knitr::kable(cor(cancer.all7), digits = 4,
-             caption = "Correlation matrix of all seven transformed quantitative predictors")
+knitr::kable(cor(cancer.all7), digits = 4)
 ```
 
-```{r}
-#| label: fig-scatterplot-matrix-full
-#| fig-cap: "Scatterplot matrix of all seven transformed quantitative variables"
-#| fig-width: 10
-#| fig-height: 8
-pairs(cancer.all7,
-      main = "Scatterplot Matrix - All Seven Predictors",
-      pch = 19, cex = 0.5,
-      col = c("steelblue", "darkorange", "firebrick")[cancer$DIAGN])
-```
-
-The scatterplot matrix in @fig-scatterplot-matrix-full and the correlation table in @tbl-corr-full show no pair of variables exceeds the $|r| \ge 0.80$ multicollinearity threshold. No variables are flagged.
+The scatterplot matrix in @fig-scatterplot-matrix and the correlation table in @tbl-corr-full show no pair of variables exceeds the $|r| \ge 0.80$ multicollinearity threshold. No variables are flagged.
 
 The five-variable correlation matrix used in the discriminant analysis (after BPH and Capsule are removed) is shown in @tbl-corr for reference.
 
 ```{r}
 #| label: tbl-corr
-knitr::kable(cor(cancer.mod[,-1]), digits = 4, caption = "Correlation matrix of the five retained transformed predictors (used in discriminant analysis)")
+#| tbl-cap: "Correlation matrix of the five retained transformed predictors (used in discriminant analysis)"
+knitr::kable(cor(cancer.mod[,-1]), digits = 4)
 ```
 
 
@@ -319,6 +307,7 @@ knitr::kable(cor(cancer.mod[,-1]), digits = 4, caption = "Correlation matrix of 
 
 ```{r}
 #| label: tbl-discrim-vals
+#| tbl-cap: "Standardized discriminant function coefficients"
 da <- discrim(cancer.mod[,-1], cancer.mod[,1])
 
 n_ld     <- ncol(da$a.stand)
@@ -326,7 +315,7 @@ std_coef <- da$a.stand
 rownames(std_coef) <- colnames(cancer.mod[,-1])
 colnames(std_coef) <- paste0("LD", seq_len(n_ld))  # label columns LD1, LD2, ...
 
-knitr::kable(std_coef, caption = "Standardized discriminant function coefficients")
+knitr::kable(std_coef)
 ```
 
 ```{r}
@@ -371,6 +360,7 @@ Variable importance for LD1 is shown in @tbl-ld1-coef.
 
 ```{r}
 #| label: tbl-ld1-coef
+#| tbl-cap: "Variables ranked by absolute LD1 standardized coefficient"
 # Sort variables by absolute LD1 coefficient (largest = most important)
 ld1_order <- names(sort(abs(std_coef[, 1]), decreasing = TRUE))
 
@@ -380,8 +370,7 @@ knitr::kable(
     LD1 = std_coef[ld1_order, 1],
     row.names = NULL
   ),
-  digits = 4,
-  caption = "Variables ranked by absolute LD1 standardized coefficient"
+  digits = 4
 )
 ```
 
@@ -407,8 +396,9 @@ Since we have two discriminant functions, 2 tests were performed (listed above),
 
 ```{r}
 #| label: tbl-discr-sig
+#| tbl-cap: "Wilks' Lambda significance tests for each discriminant function"
 discr_sig_tbl <- discr.sig(cancer.mod[,-1], cancer.mod[,1])
-knitr::kable(discr_sig_tbl, caption = "Wilks' Lambda significance tests for each discriminant function")
+knitr::kable(discr_sig_tbl)
 ```
 
 LD1: With a p-value of `r sprintf("%.4f", discr_sig_tbl["LD1", "p.values"])` being less than our adjusted significance level of 0.025, we have enough evidence that the first linear discriminant function works well in group separation of severity of seminal vesicle invasion. 
@@ -426,10 +416,11 @@ $H_a$: Variable (y) does contribute to group separation of severity of seminal v
 
 ```{r}
 #| label: tbl-discr-partial-f-display
+#| tbl-cap: "Partial F-tests for each variable, adjusted for the others"
 
 partial_f_tbl   <- partial.F(cancer.mod[,-1], cancer.mod[,1])
 
-knitr::kable(partial_f_tbl, caption = "Partial F-tests for each variable, adjusted for the others")
+knitr::kable(partial_f_tbl)
 ```
 
 
@@ -478,6 +469,7 @@ The linear classification function for each severity group is given below. An ob
 
 ```{r}
 #| label: tbl-classification-functions
+#| tbl-cap: "Linear classification function coefficients by severity group"
 lc <- lin.class(cancer.mod[, top_vars], cancer.mod[, 1])
 
 # Reshape coefficients: rows = variables, columns = groups
@@ -489,7 +481,7 @@ colnames(coefs_byvar) <- levels(cancer.mod[,1])
 lcf_table <- rbind(Constant = lc$c.0, coefs_byvar)
 colnames(lcf_table) <- levels(cancer.mod[,1])
 
-knitr::kable(lcf_table, digits = 4, caption = "Linear classification function coefficients by severity group")
+knitr::kable(lcf_table, digits = 4)
 ```
 
 ```{r}
@@ -525,6 +517,7 @@ We apply the three functions to the first observation, compute each score, and a
 
 ```{r}
 #| label: tbl-classify-obs1
+#| tbl-cap: "Linear classification function scores for Observation #1"
 groups <- levels(cancer.mod[,1])
 
 # Compute LCF score for a single observation against each group
@@ -539,8 +532,7 @@ obs1_actual <- as.character(cancer.mod[1, 1])  # true group label
 
 knitr::kable(
   data.frame(Group = groups, Score = round(obs1_scores, 4), row.names = NULL),
-  digits = 4,
-  caption = "Linear classification function scores for Observation #1"
+  digits = 4
 )
 ```
 
@@ -552,16 +544,18 @@ Using resubstitution (apparent) classification on all observations:
 
 ```{r}
 #| label: tbl-confusion-matrix
+#| tbl-cap: "Confusion Matrix"
 cls       <- rates(cancer.mod[, top_vars], cancer.mod[,1], method = "l")
 confusion <- cls[["Confusion Matrix"]]
 ACCR      <- cls[["Correct Class Rate"]]
 APER      <- cls[["Error Rate"]]
 
-knitr::kable(as.data.frame.matrix(confusion), caption = "Confusion Matrix")
+knitr::kable(as.data.frame.matrix(confusion))
 ```
 
 ```{r}
 #| label: tbl-error-rates
+#| tbl-cap: "Apparent error rate and correct classification rate"
 n         <- nrow(cancer.mod)
 n_correct <- round(ACCR * n)  
 
@@ -571,8 +565,7 @@ knitr::kable(
                "Apparent Error Rate (APER)", "N", "Correct"),
     Value  = c(ACCR, APER, n, n_correct)
   ),
-  digits = 4,
-  caption = "Apparent error rate and correct classification rate"
+  digits = 4
 )
 ```
 
