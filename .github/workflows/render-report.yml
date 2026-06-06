@@ -2,12 +2,19 @@ name: Render and Release Report
 
 on:
   push:
+    branches: [main]
+    paths:
+      - "**.qmd"
+      - "_quarto.yml"
+      - ".github/workflows/render-report.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   render:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -17,21 +24,37 @@ jobs:
           r-version: "4.4"
           use-public-rspm: true
 
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-pkg-cache-${{ hashFiles('R/*.R') }}
+          restore-keys: r-pkg-cache-
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.TinyTeX
+          key: tinytex-cache-v1
+
       - uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Install R packages and TinyTeX
         run: |
-          Rscript -e "install.packages(c('MASS', 'rmarkdown', 'knitr', 'tinytex'), repos='https://cloud.r-project.org')"
-          Rscript -e "tinytex::install_tinytex()"
+          Rscript -e "
+            code_pkgs <- unique(unlist(lapply(list.files('R', pattern='\\\\.R$', full.names=TRUE), function(f) {
+              m <- regmatches(readLines(f, warn=FALSE), gregexpr('(?:library|require)\\\\([\\\"\\'](\\\\w+)[\\\"\\']\\\\)', readLines(f, warn=FALSE), perl=TRUE))
+              sub('.*[\\\"\\'](.+)[\\\"\\'].*', '\\\\1', unlist(m))
+            })))
+            all_pkgs <- unique(c(code_pkgs, 'rmarkdown', 'knitr', 'tinytex'))
+            install.packages(all_pkgs, repos='https://cloud.r-project.org')
+          "
+          if [ ! -d ~/.TinyTeX ]; then Rscript -e "tinytex::install_tinytex()"; fi
           echo "$(Rscript -e 'cat(tinytex::tinytex_root())')/bin/x86_64-linux" >> $GITHUB_PATH
 
       - name: Render PDF
         run: quarto render report.qmd --to pdf
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Commit rendered PDF
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          files: report.pdf
-          tag_name: ${{ github.sha }}
-          name: "Report ${{ github.sha }}"
-          body: "Auto-generated PDF for commit ${{ github.sha }}."
+          commit_message: "Render Quarto PDF"
+          file_pattern: report.pdf
