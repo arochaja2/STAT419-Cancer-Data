@@ -83,7 +83,7 @@ The analysis using these features was in three stages. First we examined the dis
 
 # Graphs and Summary Statistics {#sec-explore}
 
-Before analysis, we will see the nature of each variable in our dataset. Below is a summary statistics table for each variable. 
+Before analysis, we will see the nature of each variable in our dataset. Summary statistics for each variable are shown in @tbl-summary-stats.
 
 ```{r}
 #| label: tbl-summary-stats
@@ -100,7 +100,7 @@ knitr::kable(data.frame(
 ), digits = 4, caption = "Summary statistics for all quantitative predictors")
 ```
 
-Below we can also see histograms of each variable.
+Histograms of each variable are shown in @fig-variable-histograms.
 
 
 ```{r}
@@ -171,7 +171,7 @@ plot.new()  # pad the 2x3 grid (5 plots, 1 empty cell)
 Looking at @fig-transformed-histograms, `r LOG_VARS_fmt` all appear to be roughly normal, however `r LOG1P_VARS_fmt` do not. Because discriminant analysis assumes approximate multivariate normality we drop them from our data and only use `r LOG_VARS_log_str`, and the untransformed `r KEPT_VARS_fmt` for our analysis.
 
 
-Below is a scatterplot matrix of the transformed dataset.
+A scatterplot matrix of the transformed dataset is shown in @fig-scatterplot-matrix.
 ```{r}
 #| label: fig-scatterplot-matrix
 #| fig-cap: "Scatterplot matrix of transformed dataset"
@@ -245,7 +245,7 @@ mtext("DIAGN=Severe", side=3)
 ```
 
 
-These plots look pretty much like they're all MVN. The last check is to make sure they all have the same covariance matrices. To do this we use Box's M test.
+These plots in @fig-mvn-plots appear to be multivariate normal. The last check is to make sure they all have the same covariance matrices. To do this we use Box's M test. The results are in @tbl-box-m.
 
 ```{r}
 #| label: tbl-box-m
@@ -272,8 +272,6 @@ knitr::kable(data.frame(
 We actually failed Box's M test. However, we still decided to proceed with discriminant analysis as it looks close enough.
 :::
 
-Based on the output it appears all groups follow a multivariate normal distribution. This allows us to move on to discriminant analysis.
-
 
 # Discriminant and Classification Analysis {#sec-discrim-class}
 
@@ -283,7 +281,7 @@ Based on the output it appears all groups follow a multivariate normal distribut
 knitr::kable(cor(cancer.mod[,-1]), caption = "Correlation matrix of transformed predictors")
 ```
 
-To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix shows that there is no strong linear relationship between any two variables. We can then look at the calculated correlation coefficient table. Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
+To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix (@tbl-corr) shows that there is no strong linear relationship between any two variables. We can then look at the calculated correlation coefficient table. Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
 
 
 ## Discriminant Analysis {#sec-discrim-importance}
@@ -338,9 +336,9 @@ lda_latex <- function(coefs, log_transformations = NULL, digits = 4,
 }
 ```
 
-A linear discriminant analysis was performed to observe possible separation between the groups of severity of seminal vesicle invasion and which variables contribute the most in that separation. The discriminant analysis resulted in 2 discriminant functions: `r lda_latex(std_coef, log_transformations = LOG_VARS)`
+A linear discriminant analysis was performed to observe possible separation between the groups of severity of seminal vesicle invasion and which variables contribute the most in that separation. The discriminant analysis (@tbl-discrim-vals) resulted in 2 discriminant functions: `r lda_latex(std_coef, log_transformations = LOG_VARS)`
 
-When looking at the importance of each variable in the first discriminant function, we get:
+Variable importance for LD1 is shown in @tbl-ld1-coef.
 
 ```{r}
 #| label: tbl-ld1-coef
@@ -376,7 +374,7 @@ __(2)__
 $H_0: \alpha_2 = 0$,
 $H_a: \alpha_2 \ne 0$
 
-Since we have two discriminant functions, 2 tests were performed (listed above), we must adjust our level of significance to $\frac{0.05}{2} = 0.025$. The results are:
+Since we have two discriminant functions, 2 tests were performed (listed above), we must adjust our level of significance to $\frac{0.05}{2} = 0.025$. The results are shown in @tbl-discr-sig.
 
 ```{r}
 #| label: tbl-discr-sig
@@ -390,7 +388,7 @@ LD2: With a p-value of `r sprintf("%.4f", discr_sig_tbl["LD2", "p.values"])` bei
 
 ### Significance of Each Variable, Adjusted for the Others
 
-After seeing the standardized coefficients of the first discriminant function, the variable PSA might be important in group separation. Here are the formal partial F tests for each variable: 
+After seeing the standardized coefficients of the first discriminant function, the variable PSA might be important in group separation. Formal partial F tests for each variable are shown in @tbl-discr-partial-f-display. 
 
 $H_0$: Variable (y) does not contribute to group separation of severity of seminal vesicle invasion, adjusting for the other variables.
 
@@ -398,25 +396,24 @@ $H_a$: Variable (y) does contribute to group separation of severity of seminal v
 
 
 ```{r}
-#| label: tbl-discr-partial-f
-partial_f_tbl   <- partial.F(cancer.mod[,-1], cancer.mod[,1])
-n_partial_tests <- nrow(partial_f_tbl)  # one test per variable
-```
-
-Since there are `r n_partial_tests` tests being performed, we must adjust our significance level to $\alpha^* = \frac{.05}{`r n_partial_tests`} = `r round(.05/n_partial_tests,4)`$.
-
-```{r}
 #| label: tbl-discr-partial-f-display
+
+partial_f_tbl   <- partial.F(cancer.mod[,-1], cancer.mod[,1])
+
 knitr::kable(partial_f_tbl, caption = "Partial F-tests for each variable, adjusted for the others")
 ```
 
-From our results, PSA significantly contributes the most in group separation of severity of seminal vesicle invasion, adjusting for the other variables. 
+
+Since there are `r n_partial_tests` tests being performed, we must adjust our significance level to $\alpha^* = \frac{.05}{`r  nrow(partial_f_tbl)`} = `r round(.05/n_partial_tests,4)`$.
+
+
+Looking at the Partial F Test results in @tbl-discr-partial-f-display, PSA significantly contributes the most in group separation of severity of seminal vesicle invasion, adjusting for the other variables. 
 
 All other variables do not individually contribute significantly in group separation of severity of seminal vesicle invasion, after adjusting for the other variables.
 
 ### Plot of the First Two Discriminant Functions
 
-Below is a plot of the two linear discriminant functions.
+The two linear discriminant functions are plotted in @fig-discr-plot.
 
 ```{r}
 #| label: fig-discr-plot
@@ -491,7 +488,7 @@ lcf_latex <- function(lcf, log_transformations = NULL, digits = 4) {
 }
 ```
 
-Written out explicitly, where 1 = Low, 2 = Moderate, and 3 = Severe: `r lcf_latex(lcf_table, log_transformations = LOG_VARS)`
+Writting out @tbl-classification-functions explicitly, where 1 = Low, 2 = Moderate, and 3 = Severe: `r lcf_latex(lcf_table, log_transformations = LOG_VARS)`
 
 ### Classifying Observation #1
 
