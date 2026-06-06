@@ -404,7 +404,7 @@ knitr::kable(partial_f_tbl, caption = "Partial F-tests for each variable, adjust
 ```
 
 
-Since there are `r n_partial_tests` tests being performed, we must adjust our significance level to $\alpha^* = \frac{.05}{`r  nrow(partial_f_tbl)`} = `r round(.05/n_partial_tests,4)`$.
+Since there are `r nrow(partial_f_tbl)` tests being performed, we must adjust our significance level to $\alpha^* = \frac{.05}{`r  nrow(partial_f_tbl)`} = `r round(.05/nrow(partial_f_tbl),4)`$.
 
 
 Looking at the Partial F Test results in @tbl-discr-partial-f-display, PSA significantly contributes the most in group separation of severity of seminal vesicle invasion, adjusting for the other variables. 
