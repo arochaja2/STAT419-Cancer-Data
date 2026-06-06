@@ -23,6 +23,9 @@ format:
 
 crossref:
   sec-prefix: "Section"
+
+execute:
+  echo: false
 ---
 
 
@@ -561,3 +564,11 @@ One notable result was that no variables were collinear enough to drop in @sec-c
 If we were to repeat this project, we would make two key improvements. First, we would explore alternative data transformations, either in place of or in combination with log transformations, such as the Box–Cox transformation. This would be particularly useful for variables such as BPH and Capsule, which remain skewed even after applying a log transformation. Second, we would implement leave-one-out cross-validation to estimate the classification error rate. This would allow us to assess whether the selected transformations and resulting classification model generalize well to new observations, rather than overfitting to the particular dataset used in this analysis.
 
 Finally, one variable we wish the data would have included is a direct measure of tumor stage (such as a TNM clinical stage) or a PSA reading taken over time rather than at a single point. More generally, variables that would give information about the trajectory of the disease for a given patient would help acheive cleaner separation for the observations on the border of moderate and severe, which were the toughest to classify with measurements available.
+
+# Appendix: R Code {#sec-appendix .unnumbered}
+
+```{r}
+#| ref.label: !expr setdiff(knitr::all_labels(), c("load-dataset", "define-transform-vars", "lda-formatted-output", "lcf-formatted-output", "classification-setup"))
+#| echo: true
+#| eval: false
+```
