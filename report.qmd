@@ -191,7 +191,7 @@ pairs(cancer.mod[, -1],
 
 ## Outlier Identification {#sec-outlier-id}
 
-After looking at the data we can see some trends and possibly some outliers. Of note there is a point that appears to have a higher weight than the others. We can also check for outliers by performing a slightly more statistical method. AssAssuming approximate multivariate normality, we can see how far away each dot is from the center, and the probability of seeing an observation that extreme.
+After looking at the data we can see some trends and possibly some outliers. Of note there is a point that appears to have a higher weight than the others. We can also check for outliers by performing a slightly more statistical method. Assuming approximate multivariate normality, we can see how far away each dot is from the center, and the probability of seeing an observation that extreme.
 ```{r}
 #| label: tbl-outlier-identification
 # Use mahalanobis to measure distance from centroid
@@ -281,7 +281,7 @@ We actually failed Box's M test. However, we still decided to proceed with discr
 knitr::kable(cor(cancer.mod[,-1]), caption = "Correlation matrix of transformed predictors")
 ```
 
-To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix (@tbl-corr) shows that there is no strong linear relationship between any two variables. We can then look at the calculated correlation coefficient table. Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
+To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix (@fig-scatterplot-matrix) shows that there is no strong linear relationship between any two variables. We can then look at the calculated correlation coefficient table (@tbl-corr). Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
 
 
 ## Discriminant Analysis {#sec-discrim-importance}
@@ -488,7 +488,7 @@ lcf_latex <- function(lcf, log_transformations = NULL, digits = 4) {
 }
 ```
 
-Writting out @tbl-classification-functions explicitly, where 1 = Low, 2 = Moderate, and 3 = Severe: `r lcf_latex(lcf_table, log_transformations = LOG_VARS)`
+Writing out @tbl-classification-functions explicitly, where 1 = Low, 2 = Moderate, and 3 = Severe: `r lcf_latex(lcf_table, log_transformations = LOG_VARS)`
 
 ### Classifying Observation #1
 
@@ -560,7 +560,7 @@ One notable result was that no variables were collinear enough to drop in @sec-c
 
 If we were to repeat this project, we would make two key improvements. First, we would explore alternative data transformations, either in place of or in combination with log transformations, such as the Box–Cox transformation. This would be particularly useful for variables such as BPH and Capsule, which remain skewed even after applying a log transformation. Second, we would implement leave-one-out cross-validation to estimate the classification error rate. This would allow us to assess whether the selected transformations and resulting classification model generalize well to new observations, rather than overfitting to the particular dataset used in this analysis.
 
-Finally, one variable we wish the data would have included is a direct measure of tumor stage (such as a TNM clinical stage) or a PSA reading taken over time rather than at a single point. More generally, variables that would give information about the trajectory of the disease for a given patient would help acheive cleaner separation for the observations on the border of moderate and severe, which were the toughest to classify with measurements available.
+Finally, one variable we wish the data would have included is a direct measure of tumor stage (such as a TNM clinical stage) or a PSA reading taken over time rather than at a single point. More generally, variables that would give information about the trajectory of the disease for a given patient would help achieve cleaner separation for the observations on the border of moderate and severe, which were the toughest to classify with measurements available.
 
 # Appendix: R Code {#sec-appendix .unnumbered}
 
