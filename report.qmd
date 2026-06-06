@@ -12,8 +12,7 @@ number-sections: true
 number-depth: 2
 
 format:
-  html:
-    css: styles.css
+  html: default
   pdf: 
     colorlinks: true
     header-includes:
@@ -95,7 +94,7 @@ knitr::kable(data.frame(
   Max      = sapply(cancer[QUANT_VARS], max, na.rm = TRUE),
   SD       = sapply(cancer[QUANT_VARS], sd, na.rm = TRUE),
   row.names = NULL
-), digits = 4)
+), digits = 4, caption = "Summary statistics for all quantitative predictors")
 ```
 
 Below we can also see histograms of each variable.
@@ -206,7 +205,8 @@ sig_level <- 0.05 / nrow(cancer[, -1])
 # (large distance -> small p -> flagged as outlier)
 observation_p <- pchisq(md, df = ncol(cancer.mod[, -1]), lower.tail = FALSE)
 
-knitr::kable(cbind(cancer, observation_p)[which(observation_p < sig_level), ])
+knitr::kable(cbind(cancer, observation_p)[which(observation_p < sig_level), ],
+             caption = "Observations flagged as outliers by Bonferroni-corrected Mahalanobis distance")
 ```
 
 Based on the results we can see that observation 41 appears to be an outlier. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within typical range observed in this data set, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significantly higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this data point from our analysis.
@@ -270,7 +270,7 @@ Based on the output it appears all groups follow a multivariate normal distribut
 ## Correlated Quantitative Variables (Multicollinearity) {#sec-collinearity}
 ```{r}
 #| label: tbl-corr
-knitr::kable(cor(cancer.mod[,-1]))
+knitr::kable(cor(cancer.mod[,-1]), caption = "Correlation matrix of transformed predictors")
 ```
 
 To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix shows that there is no strong linear relationship between any two variables. We can then look at the calculated correlation coefficient table. Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
@@ -289,7 +289,7 @@ std_coef <- da$a.stand
 rownames(std_coef) <- colnames(cancer.mod[,-1])
 colnames(std_coef) <- paste0("LD", seq_len(n_ld))  # label columns LD1, LD2, ...
 
-knitr::kable(std_coef)
+knitr::kable(std_coef, caption = "Standardized discriminant function coefficients")
 ```
 
 ```{r}
@@ -344,6 +344,7 @@ knitr::kable(
     row.names = NULL
   ),
   digits = 4,
+  caption = "Variables ranked by absolute LD1 standardized coefficient"
 )
 ```
 
@@ -370,7 +371,7 @@ Since we have two discriminant functions, 2 tests were performed (listed above),
 ```{r}
 #| label: tbl-discr-sig
 discr_sig_tbl <- discr.sig(cancer.mod[,-1], cancer.mod[,1])
-knitr::kable(discr_sig_tbl)
+knitr::kable(discr_sig_tbl, caption = "Wilks' Lambda significance tests for each discriminant function")
 ```
 
 LD1: With a p-value of `r sprintf("%.4f", discr_sig_tbl["LD1", "p.values"])` being less than our adjusted significance level of 0.025, we have enough evidence that the first linear discriminant function works well in group separation of severity of seminal vesicle invasion. 
@@ -396,7 +397,7 @@ Since there are `r n_partial_tests` tests being performed, we must adjust our si
 
 ```{r}
 #| label: tbl-discr-partial-f-display
-knitr::kable(partial_f_tbl)
+knitr::kable(partial_f_tbl, caption = "Partial F-tests for each variable, adjusted for the others")
 ```
 
 From our results, PSA significantly contributes the most in group separation of severity of seminal vesicle invasion, adjusting for the other variables. 
@@ -452,7 +453,7 @@ colnames(coefs_byvar) <- levels(cancer.mod[,1])
 lcf_table <- rbind(Constant = lc$c.0, coefs_byvar)
 colnames(lcf_table) <- levels(cancer.mod[,1])
 
-knitr::kable(lcf_table, digits = 4)
+knitr::kable(lcf_table, digits = 4, caption = "Linear classification function coefficients by severity group")
 ```
 
 ```{r}
@@ -503,6 +504,7 @@ obs1_actual <- as.character(cancer.mod[1, 1])  # true group label
 knitr::kable(
   data.frame(Group = groups, Score = round(obs1_scores, 4), row.names = NULL),
   digits = 4,
+  caption = "Linear classification function scores for Observation #1"
 )
 ```
 
@@ -519,7 +521,7 @@ confusion <- cls[["Confusion Matrix"]]
 ACCR      <- cls[["Correct Class Rate"]]
 APER      <- cls[["Error Rate"]]
 
-knitr::kable(as.data.frame.matrix(confusion))
+knitr::kable(as.data.frame.matrix(confusion), caption = "Confusion Matrix")
 ```
 
 ```{r}
@@ -533,7 +535,8 @@ knitr::kable(
                "Apparent Error Rate (APER)", "N", "Correct"),
     Value  = c(ACCR, APER, n, n_correct)
   ),
-  digits = 4
+  digits = 4,
+  caption = "Apparent error rate and correct classification rate"
 )
 ```
 
