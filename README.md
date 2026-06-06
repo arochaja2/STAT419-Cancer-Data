@@ -1,74 +1,69 @@
-# STAT 419 Project — Cancer Data (Group 2)
+# STAT 419 — Prostate Cancer Discriminant Analysis (Group 2)
 
 Discriminant and classification analysis of prostate cancer prognostic
 measurements, for the STAT 419 Multivariate Analysis course project.
 
-The data set records 8 measurements on 97 men with advanced prostate cancer.
-The grouping variable is **DIAGN** — severity of seminal vesicle invasion
-(1 = low, 2 = moderate, 3 = severe). The remaining seven variables are
-quantitative predictors (PSA, Volume, Weight, Age, BPH, Capsule, Gleason).
+**[View the rendered PDF report](https://github.com/arochaja2/STAT419-Cancer-Data/blob/main/report.pdf)**
 
-> This repo contains **only the coding portion and project structure**. The
-> written report (cover page, prose for Sections A–E) is produced separately.
+## Overview
+
+The dataset records 8 measurements on 97 men with advanced prostate cancer.
+The grouping variable is **DIAGN** — severity of seminal vesicle invasion
+(Low / Moderate / Severe, nearly balanced at ~32 per group). The seven
+quantitative predictors are PSA, Volume, Weight, Age, BPH, Capsule, and Gleason.
+
+The analysis proceeded in four stages:
+
+1. **Exploratory analysis** — histograms and summary statistics for each variable.
+2. **Transformation & outlier removal** — log transforms applied to right-skewed
+   variables (PSA, Volume, Weight); BPH and Capsule dropped for persistent
+   non-normality; one high-leverage outlier (obs #41, extreme Weight) removed.
+3. **Discriminant analysis** — two linear discriminant functions fit on the
+   remaining five variables. LD1 is significant (Wilks' Lambda test, *p* < 0.025);
+   LD2 is not. PSA is by far the most important variable by standardized
+   coefficient and partial F-test.
+4. **Classification** — linear classification functions built on the top 4
+   variables by LD1 importance. Resubstitution ACCR ≈ 79%, with all
+   misclassifications between adjacent severity groups (no Low ↔ Severe errors).
 
 ## Project structure
 
 ```
-stat419-cancer/
-├── README.md
-├── stat419-cancer.Rproj        # open this in RStudio so paths resolve to root
-├── .gitignore
+STAT419-Cancer-Data/
+├── report.qmd                    # single source file — all analysis and prose
+├── report.pdf                    # rendered output (auto-built by CI)
+├── _all_customized_functions.R   # course-provided multivariate helper functions
 ├── data/
-│   ├── cancer_419.csv          # the data set
-│   └── data_description.pdf     # variable descriptions (provided)
-├── R/
-│   ├── 00_setup.R              # load data + packages, define paths & helpers
-│   ├── 01_explore.R            # Section B: histograms + summary statistics
-│   ├── 02_correlation.R        # Section C.1: correlation / multicollinearity
-│   ├── 03_discriminant.R       # Section C.2: discriminant analysis
-│   ├── 04_classification.R     # Section C.3: classification analysis
-│   └── run_all.R               # runs the whole pipeline in order
-├── output/
-│   ├── figures/                # generated PNGs (git-ignored)
-│   └── tables/                 # generated CSVs (git-ignored)
-└── report/                     # place the written report here
+│   ├── cancer_419.csv            # dataset (97 obs × 8 variables)
+│   └── data_description.pdf      # variable descriptions
+└── .github/workflows/
+    └── render-report.yml         # CI: renders report.pdf on push to main
 ```
 
-## How to run
+## How to render
 
-You need R (the only required package, **MASS**, ships with base R).
+Requires R and [Quarto](https://quarto.org). The only R package needed is
+**MASS** (ships with base R).
 
-**Option A — RStudio:** open `stat419-cancer.Rproj`, then in the console:
+**RStudio:** open `stat419-cancer.Rproj`, then click *Render* on `report.qmd`, or:
 
 ```r
-source("R/run_all.R")
+quarto::quarto_render("report.qmd")
 ```
 
-**Option B — command line**, from the project root:
+**Command line:**
 
 ```sh
-Rscript R/run_all.R
+quarto render report.qmd --to pdf
 ```
 
-Each script can also be run on its own; if its dependencies aren't loaded yet
-it will source the earlier scripts automatically. Figures land in
-`output/figures/`, tables in `output/tables/`, and the console prints the
-results you paste into the report.
+The PDF is also built automatically by GitHub Actions on every push to `main`
+that touches `report.qmd`.
 
-## How scripts map to report sections
+## Key findings
 
-| Report section | Script | Produces |
-|---|---|---|
-| B — Graphs & summary stats | `01_explore.R` | histogram per variable, summary stats table |
-| C.1 — Multicollinearity | `02_correlation.R` | correlation matrix, scatterplot matrix, flagged pairs |
-| C.2 — Discriminant analysis | `03_discriminant.R` | standardized coefficients, importance ranking, Wilks' Lambda + per-variable tests, LD1×LD2 plot |
-| C.3 — Classification | `04_classification.R` | linear classification functions, Obs #1 prediction, confusion matrix, APER & correct rate |
-
-## Notes
-
-- The grouping variable is read as a labelled factor (Low / Moderate / Severe).
-- Standardized discriminant coefficients are computed using the pooled
-  within-group SD (the standard approach for comparing variable importance).
-- The LD1 × LD2 plot uses a fixed-corner legend rather than the interactive
-  `locator()` placement mentioned in the spec, to avoid the lock-up the
-  instructions warn about. Adjust the legend position if it overlaps points.
+- **PSA** is the dominant predictor — it is the only variable with a
+  significant partial F-test after adjusting for the others.
+- **LD1** alone captures most of the group separation; LD2 is not significant.
+- No multicollinearity was flagged among the five retained variables (all
+  pairwise |r| < 0.80).
