@@ -224,8 +224,6 @@ cancer.mod <- cancer.mod[-41,]
 ```
 
 
-We then checked our MVN assumptions (see @sec-mvn-assumption).
-
 ## MVN Assumptions {#sec-mvn-assumption}
 
 ```{r}
@@ -248,7 +246,7 @@ mtext("DIAGN=Severe", side=3)
 ```
 
 
-These plots in @fig-mvn-plots appear to be multivariate normal. The last check is to make sure they all have the same covariance matrices. To do this we use Box's M test. The results are in @tbl-box-m.
+The plots in @fig-mvn-plots appear to be multivariate normal. The last check is to make sure they all have the same covariance matrices. To do this we use Box's M test. The results are in @tbl-box-m.
 
 ```{r}
 #| label: tbl-box-m
