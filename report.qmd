@@ -1,6 +1,6 @@
 ---
 title: 'Discriminant and Classification Analysis of Prostate Cancer Prognostic Measurements'
-subtitle: 'STAT 419: Multivariate Analysis — Spring 2026 Course Project'
+subtitle: 'STAT 419: Multivariate Analysis — Spring 2026 Course Project — Group 2'
 
 author: 
   - Curtis Bradley
@@ -74,7 +74,7 @@ The remaining seven variables are all quantitative and will serve as the predict
 * **Volume** - volume of the prostate cancer, in cubic centimeters ($\text{cm}^3$). A larger tumor volume generally signals a more advanced condition.
 * **Weight** - weight of the prostate gland, in grams (g).
 * **Age** - age of the patient, in years.
-* **BPH** - amount of benign prostatic hyperplasia, in square centimeters ($\text{cm}$2$). A measure of non-cancerous enlargement of the prostate.
+* **BPH** - amount of benign prostatic hyperplasia, in square centimeters ($\text{cm}^2$). A measure of non-cancerous enlargement of the prostate.
 * **Capsule** - degree of capsular penetration, i.e. the extent to which the tumor has pushed into or through the prostatic capsule.
 * **Gleason** - a pathologically determined qualitative grade of the disease. Higher scores indicate a worse prognosis; in this sample the score takes only the integer values 6, 7, 8.
 
@@ -119,6 +119,8 @@ for (var in QUANT_VARS) {
 }
 
 ```
+
+From @fig-variable-histograms: **PSA** is strongly right-skewed with a long upper tail, suggesting a log transformation is needed. **Volume** is similarly right-skewed. **Weight** is also right-skewed with one extreme high value (observation 41). **Age** is roughly symmetric and approximately normal. **BPH** is heavily right-skewed with many zero values. **Capsule** is also right-skewed with a spike at zero. **Gleason** takes only integer values 6, 7, and 8 and is roughly symmetric.
 
 
 ```{r}
@@ -212,7 +214,7 @@ knitr::kable(cbind(cancer, observation_p)[which(observation_p < sig_level), ],
              caption = "Observations flagged as outliers by Bonferroni-corrected Mahalanobis distance")
 ```
 
-Based on the results we can see that observation 41 appears to be an outlier. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within typical range observed in this data set, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significantly higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this data point from our analysis.
+Based on the results we can see that observation 41 appears to be an outlier. Looking at the output of @tbl-outlier-identification and comparing it to @tbl-summary-stats, all of the variables seem to be within typical range observed in this data set, with the exception of `Weight`. The weight of `r cancer$Weight[41]` grams is significantly higher than the normal range. In fact, it is `r round((cancer$Weight[41] - mean(cancer$Weight)) /  sd(cancer$Weight),3)` standard deviations away from the mean weight. For this reason we excluded this data point from all subsequent analyses. All results from @sec-mvn-assumption onward are based on N = `r nrow(cancer) - 1` observations.
 
 
 ```{r}
@@ -276,12 +278,40 @@ We actually failed Box's M test. However, we still decided to proceed with discr
 # Discriminant and Classification Analysis {#sec-discrim-class}
 
 ## Correlated Quantitative Variables (Multicollinearity) {#sec-collinearity}
+
+As required, we first examine all seven quantitative variables for multicollinearity. Note that BPH and Capsule were excluded from the discriminant and classification analyses in @sec-discrim-importance and @sec-classification due to persistent non-normality after transformation (see @sec-explore); this is a pre-processing step beyond the standard spec workflow. Their correlations with the other variables are still examined here for completeness.
+
 ```{r}
-#| label: tbl-corr
-knitr::kable(cor(cancer.mod[,-1]), caption = "Correlation matrix of transformed predictors")
+#| label: tbl-corr-full
+# Full 7-variable correlation matrix on log/log1p transformed versions
+cancer.all7 <- cbind(
+  cancer[setdiff(colnames(cancer), c(TRANSFORMED_VARS, GROUP_VAR))],
+  log(cancer[LOG_VARS]),
+  log1p(cancer[LOG1P_VARS])
+)
+knitr::kable(cor(cancer.all7), digits = 4,
+             caption = "Correlation matrix of all seven transformed quantitative predictors")
 ```
 
-To assess for multicollinearity, we analyze the correlation coefficients for each pair of quantitative variables. Our scatterplot matrix (@fig-scatterplot-matrix) shows that there is no strong linear relationship between any two variables. We can then look at the calculated correlation coefficient table (@tbl-corr). Using a correlation threshold of $|r| \ge 0.80$, none of our variables have high correlation. We will not flag any of our variables for multicollinearity. We will keep all of our `r length(cancer.mod) - 1` quantitative variables. 
+```{r}
+#| label: fig-scatterplot-matrix-full
+#| fig-cap: "Scatterplot matrix of all seven transformed quantitative variables"
+#| fig-width: 10
+#| fig-height: 8
+pairs(cancer.all7,
+      main = "Scatterplot Matrix — All Seven Predictors",
+      pch = 19, cex = 0.5,
+      col = c("steelblue", "darkorange", "firebrick")[cancer$DIAGN])
+```
+
+The scatterplot matrix in @fig-scatterplot-matrix-full and the correlation table in @tbl-corr-full show no pair of variables exceeds the $|r| \ge 0.80$ multicollinearity threshold. No variables are flagged.
+
+The five-variable correlation matrix used in the discriminant analysis (after BPH and Capsule are removed) is shown in @tbl-corr for reference.
+
+```{r}
+#| label: tbl-corr
+knitr::kable(cor(cancer.mod[,-1]), digits = 4, caption = "Correlation matrix of the five retained transformed predictors (used in discriminant analysis)")
+```
 
 
 ## Discriminant Analysis {#sec-discrim-importance}
@@ -441,7 +471,7 @@ TOP_K    <- 4
 top_vars <- head(ld1_order, TOP_K)  # top 4 variables by LD1 importance
 ```
 
-Looking at @tbl-ld1-coef, the top four variables, in order of importance, are `r paste(top_vars, collapse = ", ")`.
+Looking at @tbl-ld1-coef, the top four variables, in order of importance, are `r paste(top_vars, collapse = ", ")`. Note that these are the top four among the five retained predictors; BPH and Capsule were excluded prior to the discriminant analysis due to non-normality (@sec-explore).
 
 ### Linear Classification Functions
 
@@ -565,7 +595,7 @@ Finally, one variable we wish the data would have included is a direct measure o
 # Appendix: R Code {#sec-appendix .unnumbered}
 
 ```{r}
-#| ref.label: !expr setdiff(knitr::all_labels(), c("load-dataset", "define-transform-vars", "lda-formatted-output", "lcf-formatted-output", "classification-setup"))
+#| ref.label: !expr setdiff(knitr::all_labels(), c("define-transform-vars", "lda-formatted-output", "lcf-formatted-output"))
 #| echo: true
 #| eval: false
 ```
